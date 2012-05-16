@@ -1,0 +1,20 @@
+{
+  "name": "statsd-ganglia-backend",
+  "description": "A backend for StatsD to emit stats to Ganglia",
+  "author": "Jeff Buchbinder",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbuchbinder/statsd-ganglia-backend.git"
+  },
+  "version": "0.1.0",
+  "dependencies": {
+    "ganglia": "0.0.3"
+  },
+  "devDependencies": {
+    "nodeunit": "0.7.x"
+  },
+  "engine": {
+    "node": ">=0.4"
+  },
+  "main": "statsd-ganglia-backend/index.js"
+}
