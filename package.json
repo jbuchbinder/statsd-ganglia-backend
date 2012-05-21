@@ -6,9 +6,9 @@
     "type": "git",
     "url": "https://github.com/jbuchbinder/statsd-ganglia-backend.git"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
-    "ganglia": "0.0.3"
+    "gmetric": "0.0.4"
   },
   "devDependencies": {
     "nodeunit": "0.7.x"
