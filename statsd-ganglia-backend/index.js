@@ -18,7 +18,7 @@
 
 var net = require('net'),
    util = require('util'),
-   gmetric   = require('gmetric');
+   gm   = require('gmetric');
 
 var debug;
 var flushInterval;
@@ -46,7 +46,7 @@ var post_stats = function ganglia_post_stats(rstats) {
           }
           //gmetric.send( gangliaUseHost, k, rstats[k], 'count', gm.VALUE_INT, gm.SLOPE_BOTH, 0, 0, 'stats' );
 
-          var gmetric = new gmetric();
+          var gmetric = new gm();
           var metric = {
             hostname: (gangliaSpoof != null) ? gangliaUseHost : gangliaSpoof,
             group: gangliaGroup,
