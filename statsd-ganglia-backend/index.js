@@ -11,8 +11,9 @@
  *
  *   host:    Hostname of ganglia gmond server.
  *   port:    Port to contact ganglia gmond server at.
- *   spoof:   Ganglia "spoof" string.
+ *   spoof:   Ganglia "spoof" string (e.g. "<ip>:<hostname>" or "<hostname>:<hostname>").
  *   useHost: Present as this hostname to gmond
+ *   group:   The group name under which the stats should appear in the ganglia-webfrontend
  *
  */
 
@@ -31,20 +32,30 @@ var gangliaStats = {};
 
 var post_stats = function ganglia_post_stats(rstats) {
   if (gangliaHost) {
-    if (typeof gmetric == 'undefined') {
-      if (debug) {
-        util.log('Initializing gmetric with ' + gangliaHost + ':' + gangliaPort);
-      }
-      gmetric = new gm.gmetric( gangliaHost, gangliaPort, gangliaSpoof != null ? gangliaSpoof : null );
-    }
-
     for (var k in rstats) {
       if (rstats.hasOwnProperty(k)) {
         try {
           if (debug) {
-            util.log('gmetric.sendMetric ' + k + ' ' + rstats[k]);
+            util.log('gmetric.send ' + k + ' ' + rstats[k]);
           }
-          gmetric.sendMetric( gangliaUseHost, k, rstats[k], 'count', gm.VALUE_INT, gm.SLOPE_BOTH, 0, 0, 'stats' );
+
+          var gmetric = new gm();
+          var metric = {
+            hostname: (gangliaSpoof != null) ? gangliaSpoof : gangliaUseHost,
+            group: gangliaGroup,
+            spoof: (gangliaSpoof != null),
+            units: 'count',
+            slope: 'both',
+
+            name: k,
+            value: rstats[k],
+            type: 'int32',
+            tmax: 0,
+            dmax: 0
+          };
+
+          gmetric.send(gangliaHost, gangliaPort, metric);
+
           gangliaStats.last_flush = Math.round(new Date().getTime() / 1000);
         } catch (e) {
           if (debug) {
@@ -155,6 +166,7 @@ exports.init = function ganglia_init(startup_time, config, events) {
   gangliaPort = config.ganglia.port || 8649;
   gangliaSpoof = config.ganglia.spoof;
   gangliaUseHost = config.ganglia.useHost;
+  gangliaGroup = config.ganglia.group || 'StatsD';
 
   gangliaStats.last_flush = startup_time;
   gangliaStats.last_exception = startup_time;
