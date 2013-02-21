@@ -13,6 +13,7 @@
  *   port:    Port to contact ganglia gmond server at.
  *   spoof:   Ganglia "spoof" string.
  *   useHost: Present as this hostname to gmond
+ *   group:   The gmond group
  *
  */
 
@@ -50,13 +51,15 @@ var post_stats = function ganglia_post_stats(rstats) {
           var metric = {
             hostname: (gangliaSpoof != null) ? gangliaUseHost : gangliaSpoof,
             group: gangliaGroup,
-            spoof: (gangliaSpoof != null),
+            spoof: (gangliaSpoof != null) ? 0 : 1,
             units: 'count',
             slope: 'both',
 
             name: k,
             value: rstats[k],
             type: 'int32'
+            tmax: 0,
+            dmax: 0
           };
 
           gmetric.send(gangliaHost, gangliaPort, metric);
