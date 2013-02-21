@@ -11,9 +11,9 @@
  *
  *   host:    Hostname of ganglia gmond server.
  *   port:    Port to contact ganglia gmond server at.
- *   spoof:   Ganglia "spoof" string.
+ *   spoof:   Ganglia "spoof" string (e.g. "<ip>:<hostname>" or "<hostname>:<hostname>").
  *   useHost: Present as this hostname to gmond
- *   group:   The gmond group
+ *   group:   The group name under which the stats should appear in the ganglia-webfrontend
  *
  */
 
@@ -32,20 +32,12 @@ var gangliaStats = {};
 
 var post_stats = function ganglia_post_stats(rstats) {
   if (gangliaHost) {
-    // if (typeof gmetric == 'undefined') {
-    //   if (debug) {
-    //     util.log('Initializing gmetric with ' + gangliaHost + ':' + gangliaPort);
-    //   }
-    //   gmetric = new gm( gangliaHost, gangliaPort, gangliaSpoof != null ? gangliaSpoof : null );
-    // }
-
     for (var k in rstats) {
       if (rstats.hasOwnProperty(k)) {
         try {
           if (debug) {
             util.log('gmetric.send ' + k + ' ' + rstats[k]);
           }
-          //gmetric.send( gangliaUseHost, k, rstats[k], 'count', gm.VALUE_INT, gm.SLOPE_BOTH, 0, 0, 'stats' );
 
           var gmetric = new gm();
           var metric = {
