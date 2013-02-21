@@ -57,7 +57,7 @@ var post_stats = function ganglia_post_stats(rstats) {
 
             name: k,
             value: rstats[k],
-            type: 'int32'
+            type: 'int32',
             tmax: 0,
             dmax: 0
           };
