@@ -49,9 +49,9 @@ var post_stats = function ganglia_post_stats(rstats) {
 
           var gmetric = new gm();
           var metric = {
-            hostname: (gangliaSpoof != null) ? gangliaUseHost : gangliaSpoof,
+            hostname: (gangliaSpoof != null) ? gangliaSpoof : gangliaUseHost,
             group: gangliaGroup,
-            spoof: (gangliaSpoof != null) ? 1 : 0,
+            spoof: (gangliaSpoof != null),
             units: 'count',
             slope: 'both',
 
