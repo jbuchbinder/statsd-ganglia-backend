@@ -144,6 +144,10 @@ var post_stats = function ganglia_post_stats(rstats) {
 
           if (rstats[k] != null && !isNaN(rstats[k])) {
             gmetric.send(gangliaHost, gangliaPort, metric);
+          } else {
+            if (debug) {
+              util.log('Metric ' + k + ' has an unknown value: ' + rstats[k])
+            }
           }
 
           gangliaStats.last_flush = Math.round(new Date().getTime() / 1000);
@@ -251,7 +255,7 @@ var backend_status = function ganglia_status(writeCb) {
 };
 
 exports.init = function ganglia_init(startup_time, config, events) {
-  debug = config.debug;
+  debug = config.debug && config.ganglia.debug;
   gangliaHost = config.ganglia.host;
   gangliaPort = config.ganglia.port || 8649;
   gangliaSpoof = config.ganglia.spoof;
