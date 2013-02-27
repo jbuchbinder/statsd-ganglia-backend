@@ -14,7 +14,51 @@
  *   spoof:   Ganglia "spoof" string (e.g. "<ip>:<hostname>" or "<hostname>:<hostname>").
  *   useHost: Present as this hostname to gmond
  *   group:   The group name under which the stats should appear in the ganglia-webfrontend
+ *   mappings: Object {
+ *       <metric name>: {
+ *         name: '<display name>'
+ *         group: '<group name>',
+ *         units: '<unit>',
+ *         slope: '<slope>',
+ *         type: '<type>'
+ *       },
+ *       // Alternatively
+ *       ALL: {
+ *           mappingMethod: '<method name>',
+ *           mappingSource: '<js file where [mappingMethod] lives>'
+ *         },
+ *     }
  *
+ *
+ *   The [mappingMethod] has to take one parameter - a dictionary containing:
+ *   {
+ *     name: '<metric name>',
+ *     group: '<metric group>',
+ *     units: '<metric units>',
+ *     slope: '<metric slope>',
+ *     type: '<metric type>'
+ *   }
+ *   The method then can perform some changes and has to return the dictionary populated with new values.
+ *
+ *
+ *     <slope> can be one of:
+ *       zero
+ *       positive
+ *       negative
+ *       both
+ *       unspecified
+ *
+ *
+ *     <type> can be one of:
+ *       string
+ *       int8
+ *       uint8
+ *       int16
+ *       uint16
+ *       int32
+ *       uint32
+ *       float
+ *       double
  */
 
 var net = require('net'),
@@ -39,22 +83,72 @@ var post_stats = function ganglia_post_stats(rstats) {
             util.log('gmetric.send ' + k + ' ' + rstats[k]);
           }
 
+          var metricData = {
+            name: k,
+            group: gangliaGroup,
+            units: 'count',
+            slope: 'both',
+            type: 'int32'
+          };
+
+          if (gangliaStatsMappings != null) {
+            if (gangliaStatsMappings.ALL != null) {
+              var mapper = require(gangliaStatsMappings.ALL.mappingSource);
+              metricData = mapper[gangliaStatsMappings.ALL.mappingMethod](metricData);
+              if (debug) {
+                util.log('Mapped ' + k + ' to ' + metricData.name + ' using ALL mapper.');
+              }
+            } else if (gangliaStatsMappings[k] != null) {
+              var mapping = gangliaStatsMappings[k];
+
+              if (mapping.name) {
+                metricData.name = mapping.name;
+              }
+
+              if (mapping.group) {
+                metricData.group = mapping.group;
+              }
+
+              if (mapping.units) {
+                metricData.units = mapping.units;
+              }
+
+              if (mapping.slope) {
+                metricData.slope = mapping.slope;
+              }
+
+              if (mapping.type) {
+                metricData.type = mapping.type;
+              }
+
+              if (debug) {
+                util.log('Mapped ' + k + ' to ' + metricData.name + ' using specific mapper.');
+              }
+            }
+          }
+
           var gmetric = new gm();
           var metric = {
             hostname: (gangliaSpoof != null) ? gangliaSpoof : gangliaUseHost,
-            group: gangliaGroup,
+            group: metricData.group,
             spoof: (gangliaSpoof != null),
-            units: 'count',
-            slope: 'both',
+            units: metricData.units,
+            slope: metricData.slope,
 
-            name: k,
+            name: metricData.name,
             value: rstats[k],
-            type: 'int32',
+            type: metricData.type,
             tmax: 0,
             dmax: 0
           };
 
-          gmetric.send(gangliaHost, gangliaPort, metric);
+          if (rstats[k] != null && !isNaN(rstats[k])) {
+            gmetric.send(gangliaHost, gangliaPort, metric);
+          } else {
+            if (debug) {
+              util.log('Metric ' + k + ' has an unknown value: ' + rstats[k])
+            }
+          }
 
           gangliaStats.last_flush = Math.round(new Date().getTime() / 1000);
         } catch (e) {
@@ -161,12 +255,14 @@ var backend_status = function ganglia_status(writeCb) {
 };
 
 exports.init = function ganglia_init(startup_time, config, events) {
-  debug = config.debug;
+  debug = config.debug && config.ganglia.debug;
   gangliaHost = config.ganglia.host;
   gangliaPort = config.ganglia.port || 8649;
   gangliaSpoof = config.ganglia.spoof;
   gangliaUseHost = config.ganglia.useHost;
   gangliaGroup = config.ganglia.group || 'StatsD';
+
+  gangliaStatsMappings = config.ganglia.mappings || null;
 
   gangliaStats.last_flush = startup_time;
   gangliaStats.last_exception = startup_time;
