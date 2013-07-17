@@ -230,11 +230,11 @@ var flush_stats = function ganglia_flush(ts, metrics) {
       // Report timers, regardless of length, to get around Ganglia expiry.
       var clean_pct = '' + pct;
       clean_pct.replace('.', '_');
-      rstats['stats_timers_' + key + '_mean_'  + clean_pct] = mean;
-      rstats['stats_timers_' + key + '_upper_' + clean_pct] = maxAtThreshold;
-      rstats['stats_timers_' + key + '_upper'] = max;
-      rstats['stats_timers_' + key + '_lower'] = min;
-      rstats['stats_timers_' + key + '_count'] = count;
+      rstats['stats_timers_' + key + '_mean_'  + clean_pct] = 0;
+      rstats['stats_timers_' + key + '_upper_' + clean_pct] = 0;
+      rstats['stats_timers_' + key + '_upper']              = 0;
+      rstats['stats_timers_' + key + '_lower']              = 0;
+      rstats['stats_timers_' + key + '_count']              = 0;
       numStats += 1;
     }
   }
