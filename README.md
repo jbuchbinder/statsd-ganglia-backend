@@ -6,7 +6,10 @@ StatsD Ganglia publisher backend
 
 ## Installation
 
-``npm install statsd-ganglia-backend``
+```
+cd /usr/local/lib/node_modules/statsd
+npm install statsd-ganglia-backend
+```
 
 ## License
 
