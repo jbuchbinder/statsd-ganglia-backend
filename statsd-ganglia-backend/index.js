@@ -127,7 +127,7 @@ var post_stats = function ganglia_post_stats(rstats) {
             }
           }
 
-          var gmetric = new gm();
+          var gmetric = new Gmetric();
           var metric = {
             hostname: (gangliaSpoof != null) ? gangliaSpoof : gangliaUseHost,
             group: metricData.group,
