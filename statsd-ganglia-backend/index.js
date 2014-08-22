@@ -63,7 +63,7 @@
 
 var net = require('net'),
    util = require('util'),
-   gm   = require('gmetric');
+   Gmetric   = require('gmetric');
 
 var debug;
 var flushInterval;
