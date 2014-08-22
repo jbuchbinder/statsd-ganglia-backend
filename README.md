@@ -11,6 +11,19 @@ cd /usr/local/lib/node_modules/statsd
 npm install statsd-ganglia-backend
 ```
 
+Note that this backend does not have multicast support. You must 
+configure a non-multicast UDP listener in your gmond.conf:
+
+```
+/* Plain old UDP, no mcast. */
+udp_recv_channel { 
+  port = 8650
+} 
+```
+
+and configure this backend to send messages to that port.
+
+
 ## License
 
 ```
